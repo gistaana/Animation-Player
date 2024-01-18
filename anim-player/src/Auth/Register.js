@@ -66,7 +66,7 @@ const Register = () => {
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
           <Box  sx={{ my: 8, mx: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
             <Typography component="h2" variant="h4">
-              Register
+              Registration
             </Typography>
             {error && <Alert variant="danger">{error}</Alert>}
             <Box sx={{ mt: 1 }} component="form" onSubmit={signUp}>
