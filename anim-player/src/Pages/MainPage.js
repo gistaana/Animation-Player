@@ -1,6 +1,6 @@
 import React from 'react'; 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import Authenticate from '../Auth/Authenticate';
 import { getDatabase, ref, set, get, update } from "firebase/database";
@@ -16,6 +16,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import NavigationBar from '../Features/NavigationBar';
+import mpStyle from '../CSS/MainPage.css';
+
+
 const MainPage = () => { 
     const navigate = useNavigate();
     const database = getDatabase();
@@ -30,7 +34,13 @@ const MainPage = () => {
 
     const [openNewProject, setOpenNewProject] = React.useState(false);
     const [openNewPage, setOpenPage] = React.useState(false);
-    const [pageTitle, setPageTitle] = useState("Add new Page to Project")
+    const [pageTitle, setPageTitle] = useState("Add new Page to Project");
+
+    const [userProjects, setUserProjects] = useState([""]);
+    const [registeredProjects, setRegisteredProjects] = useState([""]);
+    const [projectNum, setProjectNum] = useState('');
+
+    const [image, setImage] = useState(null);
 
     const openAddNewProject = () => {
         setOpenNewProject(true);
@@ -40,16 +50,51 @@ const MainPage = () => {
         setOpenNewProject(false);
     };
 
-    const openAddNewPage = () => {
-        setOpenPage(true);
-    };
-  
-    const closeAddNewPage = () => {
-        setPageTitle("Add new Page to Project")
-        setOpenPage(false);
-    };
+    const handleProjectCard = () => {
+      const addedProject = `Name: ${projectName}`;
+      setUserProjects([...userProjects, addedProject]);
+      setProjectNum(projectNum + 1);
+      setProjectName("");
+      setDescr("");
+    }
 
-    const AddingProject = async (e) => {
+    const handleClickProject = (index) => {
+      const projectPage = userProjects[index];
+      const dataToSend = projectPage;
+      localStorage.setItem('currentProject', dataToSend);
+      navigate(`/AnimManager`);
+    }
+
+    const fetchProjects = useCallback(async() => { 
+      try {
+        if (authUser) {
+          const userUid = authUser.uid;
+          
+          const userRef = ref(database, `Users/${userUid}/PROJECTS`);
+          const snapshot = await get(userRef); 
+          if (snapshot.exists()) { 
+            const projects = snapshot.val(); 
+    
+            let nameOfProject;
+              
+            nameOfProject = Object.keys(projects); 
+            
+            setRegisteredProjects(nameOfProject); 
+  
+            return nameOfProject
+          } else {
+            console.log('No info found for this user.');
+          }
+        } else {
+          setError('You must be logged in to see projects.');
+        }
+      } catch (error) {
+        
+      }
+      return [];
+    },[authUser, database, setError]);
+
+    const addingProject = async (e) => {
         if (e) {
           e.preventDefault();
         }
@@ -59,7 +104,7 @@ const MainPage = () => {
           const userUid = authUser.uid;
     
           update(ref(database, `Users/${userUid}/PROJECTS`), {   
-            [projectName]: { Description: descr }
+            [projectName]: { Description: descr, Pages: 0 }, 
           })
     
           const projectDocRef = doc(collection(firestore, userUid), projectName);  
@@ -69,8 +114,6 @@ const MainPage = () => {
     
             .then(() => {
               closeAddNewProject();
-              setProjectName("");
-              setDescr("");
             })
             .catch((error) => {
               console.error("Error adding Project: ", error);
@@ -78,52 +121,64 @@ const MainPage = () => {
         } else {
           setError("You must be logged in to add a Project.");
         }
-      };
+    };
 
-      const AddingPage = async (e) => {
-        if (e) {
-          e.preventDefault();
-        }
-    
-        if (authUser) {   
-          const userUid = authUser.uid; 
-    
-          const projectRef = ref(database, `Users/${userUid}/PROJECTS/${projectName}`);  
-          
-          get(projectRef) 
-            .then((snapshot) => {
-              if (snapshot.exists()) {
-    
-                const projectDocRef = doc(collection(firestore, userUid), projectName);
-                  updateDoc(projectDocRef, {
-                    [pageNum] : animPage
-                  })
-    
-                .then(() => {
-                  closeAddNewPage();
-                  setProjectName("");
-                  setAnimPage("");
-                  setPageNum("");
-                })
-                .catch((error) => {
-                  console.log("Error: ", error);
-                  setError("Project doesn't exist: " + error.message);
-                });
-              } else {
-                setPageTitle("Project doesn't exist, Try again.")
-              }
-            })
-            .catch((error) => {
-              console.log("Error: ", error);
-              setError("Error");
-            });
-        } else {
-          setError("You must be logged in to add a page.");
-        }
+    const loadProjects = async (nameOfProjects) => { 
+      if (nameOfProjects) {
+        setUserProjects(nameOfProjects);
+        setProjectNum(nameOfProjects.length); 
+      }
+    }
+
+    useEffect(() => {
+      const fetchData = async () => {
+        const nameOfProject = await fetchProjects();
+        await loadProjects(nameOfProject);
       };
+    
+      fetchData();
+    }, [fetchProjects]);
+  
  
     return (
-    <>
+    <> 
+
+      <NavigationBar/>
+      <Box>
+            <Box align = "center">
+                <Typography align="center" variant="h2" sx={{ fontWeight: 900, color: "#0066CC" }}>
+                    All Projects
+                </Typography>
+                <Typography textalign="center" variant="h7" sx={{ fontWeight: 600, color: "black" }} gutterBottom>
+                     Welcome to Animation Player where your art comes to life ! Please click an existing project you'd like to animate or create a new project !
+                </Typography> 
+            </Box>
+        </Box>
+
+      <Box>        
+          {Array.from({ length: projectNum }, (_, index) => (
+              <div key={index}>
+                  <Card style = {{marginBottom: '49px', marginTop: '49px', cursor: 'pointer', boxshadow:'15',  variant:"outlined" }} > 
+                  <Typography gutterBottom variant='h7' component='div' align="center"> </Typography>
+                      <CardContent style={{ display: 'flex', flexDirection: 'row' }}>
+                    
+                          <Grid container spacing={2}>
+                              
+
+                              <Grid item xs={14} onClick={handleClickProject.bind(null, index)}>
+                                  <Typography variant="h5" color="textSecondary" align = 'center'>
+                                    {registeredProjects[index]}
+                                  </Typography>
+                              </Grid>
+
+              
+                          </Grid>
+                      </CardContent>
+                  </Card>
+              </div>
+          ))}
+      </Box>
+
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div>
         <React.Fragment>
@@ -142,38 +197,12 @@ const MainPage = () => {
 
               <DialogActions>
                 <Button onClick={closeAddNewProject}>Cancel</Button>
-                <Button onClick={() => { AddingProject(); }}>Add</Button>
-              </DialogActions>
-          </Dialog>
-        </React.Fragment>
-      </div>
-      <div>
-        <React.Fragment align='center'>
-          <Button  align= "center" variant="outlined" onClick={openAddNewPage}>
-              Add Page to Project
-          </Button>
-          <Dialog open={openNewPage} onClose={closeAddNewPage} fullWidth>
-              <DialogTitle>{pageTitle}</DialogTitle>
-
-
-              <DialogContent>
-                <DialogContentText>Project Name:</DialogContentText>
-                <TextField autoFocus margin="dense" id="project" variant="outlined" label="Project Name" type="projectName" fullWidth value={projectName} onChange={(e) => setProjectName(e.target.value)}/>
-                <DialogContentText>Page URL:</DialogContentText>
-                <TextField autoFocus margin="dense" id="page" variant="outlined" label="URL" type="animPage" fullWidth value={animPage} onChange={(e) => setAnimPage(e.target.value)}/>
-                <DialogContentText>Page Number:</DialogContentText>
-                <TextField autoFocus margin="dense" id="num" variant="outlined" label="#" type="pageNum" fullWidth value={pageNum} onChange={(e) => setPageNum(e.target.value)}/>
-              </DialogContent>
-              
-              <DialogActions>
-                <Button onClick={closeAddNewPage}>Cancel</Button>
-                <Button onClick={() => { AddingPage(); }}>Add</Button>
+                <Button onClick={() => { addingProject(); handleProjectCard()}}>Add</Button>
               </DialogActions>
           </Dialog>
         </React.Fragment>
       </div>
       </div> 
-
       </>
 
     );
