@@ -80,7 +80,7 @@ const Navbar = () => {
  
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Typography color={"goldenrod"} variant="h6" component="div" sx={{ flexGrow: 1, my: 2 }} ></Typography>   
+      <Typography color={"goldenrod"} variant="h6" component="div" sx={{ flexGrow: 1, my: 2 }} > Animation Player</Typography>   
       <Divider />
       <MobileNavigation>
           <MobileNavItem>
@@ -98,7 +98,7 @@ const Navbar = () => {
             <IconButton color="inherit" aria-label="open drawer" edge="start" sx={{ mr: 2, display: { sm: "none" }, }} onClick={handleDrawerToggle}>
               <MenuIcon />
             </IconButton>
-            <Typography color={"goldenrod"} variant="h6" component="div" sx={{ flexGrow: 1 }} ></Typography> 
+            <Typography color={"#0066CC"} variant="h6" component="div" sx={{ flexGrow: 1 }} > Animation Player</Typography> 
 
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
               <NavigationMenu>
