@@ -31,7 +31,7 @@ const RotatingImages = () => {
 
   const saveToLocalStorage = (key, value) => {
     try {
-      localStorage.setItem(`${folderName}_${key}`, JSON.stringify(value));
+      localStorage.setItem(`${folderName}_${key}`, JSON.stringify(value));    // Saves file to local storage
     } catch (error) {
       console.error("Error saving to local storage:", error);
     }
@@ -39,7 +39,7 @@ const RotatingImages = () => {
 
   const getFromLocalStorage = (key) => {
     try {
-      const storedValue = localStorage.getItem(`${folderName}_${key}`);
+      const storedValue = localStorage.getItem(`${folderName}_${key}`);    // Gets file from local storage
       return storedValue ? JSON.parse(storedValue) : null;
     } catch (error) {
       console.error("Error getting from local storage:", error);
@@ -54,12 +54,12 @@ const RotatingImages = () => {
 
     try {
       await uploadBytes(imageRef, imageUpload);
-      const url = await getDownloadURL(imageRef);
+      const url = await getDownloadURL(imageRef);    // Saves to database while getting the the Download URL
 
       setImageUrls((prevUrls) => [...prevUrls, url]);
       setTotalImageCount((prevCount) => prevCount + 1);
 
-      saveToLocalStorage('imageURLs', [...imageUrls, url]);
+      saveToLocalStorage('imageURLs', [...imageUrls, url]);    // Saves Download URL to local storage while ensuring the array is in order of when it was uploaded
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -72,7 +72,7 @@ const RotatingImages = () => {
         setTotalImageCount((prevCount) => prevCount - 1);
         setImageUrls((prev) => prev.slice(0, -1));
 
-        saveToLocalStorage('imageURLs', imageUrls.slice(0, -1));
+        saveToLocalStorage('imageURLs', imageUrls.slice(0, -1));   // Deletes the last file in the array
       })
       .catch((error) => {
         console.log(error);
@@ -102,11 +102,11 @@ const RotatingImages = () => {
 
   const fetchImageUrls = async () => {
     try {
-      const storedImageURLs = getFromLocalStorage('imageURLs');
+      const storedImageURLs = getFromLocalStorage('imageURLs');    // Fetches imageURLs based on what project is chosen in the Main Page
       if (storedImageURLs) {
         setImageUrls(storedImageURLs);
       } else {
-        const response = await listAll(imagesListRef);
+        const response = await listAll(imagesListRef);    // if not found in local storage, get URLS from database (currently littered with problems)
         const urls = await Promise.all(
           response.items.map(async (item) => {
             const url = await getDownloadURL(item);
@@ -136,7 +136,7 @@ const RotatingImages = () => {
     fetchImageCount();
   }, []);
 
-  useEffect(() => {
+  useEffect(() => {       // rotates the images around in order, can be stopped by setting animation either true or false
     if (animation) {
       const interval = setInterval(() => {
         setCurrentImageIndex((prevIndex) =>
