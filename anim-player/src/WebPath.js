@@ -3,7 +3,8 @@ import {Routes, Route} from "react-router-dom";
 import LandingPage from "./Auth/LandingPage";
 import Register from "./Auth/Register";
 import MainPage from "./Pages/MainPage";
-import AnimManager from "./Pages/AnimManager";
+import RotatingImages from './Pages/RotatingImages';
+
 
 function WebPath() {
   return (
@@ -13,7 +14,7 @@ function WebPath() {
       <Route path="/" element={<LandingPage />} /> 
       <Route path="/Register" element={<Register />} /> 
       <Route path="/MainPage" element={<MainPage />} /> 
-      <Route path="/AnimManager" element={<AnimManager />} /> 
+      <Route path="/RotatingImages" element={<RotatingImages/>}/>
       
     </Routes>
 

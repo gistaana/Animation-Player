@@ -62,7 +62,7 @@ const MainPage = () => {
       const projectPage = userProjects[index];
       const dataToSend = projectPage;
       localStorage.setItem('currentProject', dataToSend);
-      navigate(`/AnimManager`);
+      navigate(`/RotatingImages`);
     }
 
     const fetchProjects = useCallback(async() => { 
@@ -106,11 +106,6 @@ const MainPage = () => {
           update(ref(database, `Users/${userUid}/PROJECTS`), {   
             [projectName]: { Description: descr, Pages: 0 }, 
           })
-    
-          const projectDocRef = doc(collection(firestore, userUid), projectName);  
-            await setDoc(projectDocRef, {
-              User: userUid
-            })
     
             .then(() => {
               closeAddNewProject();
