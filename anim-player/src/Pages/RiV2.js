@@ -63,7 +63,12 @@ const RiV2 = () => {
   const uploadFile = async () => {
     if (imageUpload == null) return;
 
-    const imageRef = ref(storage, `${folderName}/${folderName}_${totalImageCount + 1}`);
+    const imageName = `${folderName}_${totalImageCount + 1}`;
+
+    // Set the document name explicitly using doc function
+    const projRef = doc(collection(firestore, folderName), imageName);
+
+    const imageRef = ref(storage, `${folderName}/${imageName}`);
 
     try {
       await uploadBytes(imageRef, imageUpload);
@@ -75,18 +80,19 @@ const RiV2 = () => {
 
       saveToLocalStorage('imageURLs', [...imageUrls, url]);
 
-      const projRef = doc(collection(firestore, folderName));  
       await setDoc(projRef, {
         URL: url,
         Time: currTime
-      })
+      });
     } catch (error) {
-      console.error("Error uploading file:", error);
+        console.error("Error uploading file:", error);
     }
-  };
+};
+
 
   const deleteImage = () => {
     const desertRef = ref(storage, `${folderName}/${folderName}_${totalImageCount}`);
+    
     deleteObject(desertRef)
       .then(() => {
         setTotalImageCount((prevCount) => prevCount - 1);
