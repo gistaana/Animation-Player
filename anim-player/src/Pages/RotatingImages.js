@@ -171,13 +171,12 @@ const deleteImage = async () => {
               setImageUpload(event.target.files[0]);
             }}
           />
-  
           <button onClick={uploadFile}> Upload Image</button>
-          <button onClick={play}> Play</button>
-          <button onClick={pause}> Pause</button>
-          <button onClick={deleteImage}> Delete Last Image</button>
-          <button onClick={firstPage}> First Page</button>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+          <button onClick={deleteImage} style={{ marginRight: 10 }}> Delete Last Image</button>
+          <button onClick={firstPage} style={{ marginRight: 10 }}> First Page</button>
           <button onClick={lastPage}> Last Page</button>
+          </div>
   
           <DialogContent>
             <DialogContentText>Change Intervals</DialogContentText>
@@ -195,6 +194,12 @@ const deleteImage = async () => {
               />
             ))}
           </Box>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+      {/* Play and Pause buttons */}
+      <button onClick={play} style={{ marginRight: 10 }}> Play</button>
+      <button onClick={pause}> Pause</button>
+    </div>
   
           <DialogContent>
             <DialogContentText>Change Width</DialogContentText>
