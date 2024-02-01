@@ -178,11 +178,6 @@ const deleteImage = async () => {
           <button onClick={lastPage}> Last Page</button>
           </div>
   
-          <DialogContent>
-            <DialogContentText>Change Intervals</DialogContentText>
-            <TextField autoFocus margin="dense" id="intervals" variant="outlined" label="seconds" type="intervals" fullWidth value={intervals} onChange={(e) => setIntervals(e.target.value)} />
-          </DialogContent>
-  
           <div>Total Images: {totalImageCount}</div>
           <Box sx={{ border: 1 }} gridColumn="span 3" gridRow="span 3" p="30px">
             {imageUrls.map((url, index) => (
@@ -200,8 +195,10 @@ const deleteImage = async () => {
       <button onClick={play} style={{ marginRight: 10 }}> Play</button>
       <button onClick={pause}> Pause</button>
     </div>
-  
           <DialogContent>
+          <DialogContentText>Change Intervals</DialogContentText>
+            <TextField autoFocus margin="dense" id="intervals" variant="outlined" label="seconds" type="intervals" fullWidth value={intervals} onChange={(e) => setIntervals(e.target.value)} />
+
             <DialogContentText>Change Width</DialogContentText>
             <TextField autoFocus margin="dense" id="imgWidth" variant="outlined" label="px" type="imgWidth" fullWidth value={imgWidth} onChange={(e) => setWidth(e.target.value)} />
   
