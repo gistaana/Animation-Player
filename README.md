@@ -11,3 +11,5 @@ https://github.com/gistaana/Animation-Player/assets/89540413/325a7d3e-7b10-49bd-
 
 https://github.com/gistaana/Animation-Player/assets/89540413/48e6d2b5-9764-44b1-a697-ce1111e80ce2
 
+NOT MY ART, all owned by One Punch Man Manga and its creators ONE and Yusuke Murata
+
