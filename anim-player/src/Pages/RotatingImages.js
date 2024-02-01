@@ -7,6 +7,18 @@ import {
   getStorage,
   deleteObject,
 } from "firebase/storage";
+import {
+    doc,
+    setDoc,
+    getDocs,
+    orderBy,
+    getFirestore,
+    serverTimestamp, 
+    collection,
+    query,
+    deleteDoc,
+    limit
+} from "firebase/firestore";
 import { Box, DialogContent, DialogContentText } from "@mui/material";
 import NavigationBar from '../Features/NavigationBar';
 import { Typography, Card, CardContent } from "@mui/material";
@@ -24,60 +36,58 @@ const RotatingImages = () => {
   const [imgWidth, setWidth] = useState(700);
   const [imgHeight, setHeight] = useState(503);
   const storage = getStorage();
+  const firestore = getFirestore();
 
   const folderName = localStorage.getItem('currentProject'); 
 
   const imagesListRef = ref(storage, `${folderName}/`);
 
-  const saveToLocalStorage = (key, value) => {
-    try {
-      localStorage.setItem(`${folderName}_${key}`, JSON.stringify(value));    // Saves file to local storage
-    } catch (error) {
-      console.error("Error saving to local storage:", error);
-    }
-  };
-
-  const getFromLocalStorage = (key) => {
-    try {
-      const storedValue = localStorage.getItem(`${folderName}_${key}`);    // Gets file from local storage
-      return storedValue ? JSON.parse(storedValue) : null;
-    } catch (error) {
-      console.error("Error getting from local storage:", error);
-      return null;
-    }
-  };
-
   const uploadFile = async () => {
     if (imageUpload == null) return;
 
-    const imageRef = ref(storage, `${folderName}/${folderName}_${totalImageCount + 1}`);
+    const imageName = `${folderName}_${totalImageCount + 1}`;
+
+    // Set the document name explicitly using doc function
+    const projRef = doc(collection(firestore, folderName), imageName);
+
+    const imageRef = ref(storage, `${folderName}/${imageName}`);
 
     try {
       await uploadBytes(imageRef, imageUpload);
       const url = await getDownloadURL(imageRef);    // Saves to database while getting the the Download URL
+      const currTime = serverTimestamp();
 
-      setImageUrls((prevUrls) => [...prevUrls, url]);
+      setImageUrls((prevUrls) => [...prevUrls, url]);      // array of added urls in order of upload time
       setTotalImageCount((prevCount) => prevCount + 1);
 
-      saveToLocalStorage('imageURLs', [...imageUrls, url]);    // Saves Download URL to local storage while ensuring the array is in order of when it was uploaded
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  };
-
-  const deleteImage = () => {
-    const desertRef = ref(storage, `${folderName}/${folderName}_${totalImageCount}`);
-    deleteObject(desertRef)
-      .then(() => {
-        setTotalImageCount((prevCount) => prevCount - 1);
-        setImageUrls((prev) => prev.slice(0, -1));
-
-        saveToLocalStorage('imageURLs', imageUrls.slice(0, -1));   // Deletes the last file in the array
-      })
-      .catch((error) => {
-        console.log(error);
+      await setDoc(projRef, {
+        URL: url,
+        Time: currTime
       });
-  };
+    } catch (error) {
+        console.error("Error uploading file:", error);
+    }
+};
+
+
+const deleteImage = async () => {
+  const imageName = `${folderName}_${totalImageCount}`;
+  const desertRef = ref(storage, `${folderName}/${imageName}`);
+  const projRef = doc(collection(firestore, folderName), imageName);
+
+  try {
+      // Delete the image from storage
+      await deleteObject(desertRef);
+
+      // Delete the document from Firestore
+      await deleteDoc(projRef);
+
+      setTotalImageCount((prevCount) => prevCount - 1);
+      setImageUrls((prev) => prev.slice(0, -1));
+  } catch (error) {
+      console.log(error);
+  }
+};
 
   const play = () => {
     setAnimation(true);
@@ -102,22 +112,12 @@ const RotatingImages = () => {
 
   const fetchImageUrls = async () => {
     try {
-      const storedImageURLs = getFromLocalStorage('imageURLs');    // Fetches imageURLs based on what project is chosen in the Main Page
-      if (storedImageURLs) {
-        setImageUrls(storedImageURLs);
-      } else {
-        const response = await listAll(imagesListRef);    // if not found in local storage, get URLS from database (currently littered with problems)
-        const urls = await Promise.all(
-          response.items.map(async (item) => {
-            const url = await getDownloadURL(item);
-            return url;
-          })
-        );
-
-        setImageUrls(urls);
-
-        saveToLocalStorage('imageURLs', urls);
-      }
+      const response = await getDocs(
+        query(collection(firestore, folderName), orderBy("Time", "asc"))
+      );
+      const urls = response.docs.map((doc) => doc.data().URL);
+      setImageUrls(urls);
+      
     } catch (error) {
       console.error("Error fetching image URLs:", error);
     }
@@ -152,9 +152,7 @@ const RotatingImages = () => {
 
   return (
     <>
-      <NavigationBar />
-  
-      
+      <NavigationBar /> 
         <Box align="center" mb={3}>
           <Typography align="center" variant="h2" sx={{ fontWeight: 900, color: "#0066CC" }}>
               {folderName}

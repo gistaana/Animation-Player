@@ -11,11 +11,11 @@ function WebPath() {
   
     <Routes> 
   
-      <Route path="/" element={<LandingPage />} /> 
+      <Route path="/" element={<LandingPage/>} /> 
       <Route path="/Register" element={<Register />} /> 
       <Route path="/MainPage" element={<MainPage />} /> 
-      <Route path="/RotatingImages" element={<RotatingImages/>}/>
-      
+      <Route path="/RotatingImages" element={<RotatingImages/>} />
+    
     </Routes>
 
 
