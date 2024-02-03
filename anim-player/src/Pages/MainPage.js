@@ -40,8 +40,6 @@ const MainPage = () => {
     const [registeredProjects, setRegisteredProjects] = useState([""]);
     const [projectNum, setProjectNum] = useState('');
 
-    const [image, setImage] = useState(null);
-
     const openAddNewProject = () => {
         setOpenNewProject(true);
     };
@@ -109,6 +107,9 @@ const MainPage = () => {
     
             .then(() => {
               closeAddNewProject();
+              localStorage.setItem('currentProject', projectName);
+              navigate(`/RotatingImages`);
+
             })
             .catch((error) => {
               console.error("Error adding Project: ", error);
@@ -158,8 +159,6 @@ const MainPage = () => {
                       <CardContent style={{ display: 'flex', flexDirection: 'row' }}>
                     
                           <Grid container spacing={2}>
-                              
-
                               <Grid item xs={14} onClick={handleClickProject.bind(null, index)}>
                                   <Typography variant="h5" color="textSecondary" align = 'center'>
                                     {registeredProjects[index]}
