@@ -138,7 +138,6 @@ const MainPage = () => {
  
     return (
     <> 
-
       <NavigationBar/>
       <Box>
             <Box align = "center">
